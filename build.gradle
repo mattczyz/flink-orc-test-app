@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'scala'
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "5.2.0"
+}
+
+
+// artifact properties
+group = 'uk.co.realb'
+version = '0.2-SNAPSHOT'
+mainClassName = 'uk.co.realb.AppEncoder'
+description = """Flink Quickstart Job"""
+
+ext {
+    javaVersion = '1.8'
+    flinkVersion = '1.9.1'
+    scalaBinaryVersion = '2.11'
+    scalaVersion =  '2.11.12'
+    slf4jVersion = '1.7.7'
+    log4jVersion = '1.2.17'
+}
+
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+applicationDefaultJvmArgs = ["-Dlog4j.configuration=log4j.properties"]
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    mavenLocal()
+}
+
+dependencies {
+    // scala
+    compileOnly "org.scala-lang:scala-library:$scalaVersion"
+
+    compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compile 'com.github.mattczyz:flink-orc:release-0.4'
+
+//    compile (group: 'uk.co.realb.flink.orc', name: 'flink-orc', version: '0.4-SNAPSHOT', changing: true)
+
+    compileOnly 'org.apache.hadoop:hadoop-common:2.8.3'
+    compile ('org.apache.hive:hive-exec:2.3.4:core')
+
+    compileOnly "log4j:log4j:${log4jVersion}"
+    compileOnly "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+
+}
+
+run.classpath = sourceSets.main.runtimeClasspath
+
+jar {
+    manifest {
+        attributes 'Built-By': System.getProperty('user.name'),
+                'Build-Jdk': System.getProperty('java.version')
+    }
+}
+
+shadowJar {
+    mainClassName = 'uk.co.realb.App'
+    zip64 true
+}
